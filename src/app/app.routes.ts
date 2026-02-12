@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/products/products').then((m) => m.Products),
   },
   {
+    path: 'products/:brand',
+    loadComponent: () => import('./features/products/products').then((m) => m.Products),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/login/login').then((m) => m.Login),
   },

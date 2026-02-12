@@ -8,18 +8,22 @@
 
 /* Brands */
 .brands {
-  border: 5px solid #000;
   text-align: center;
   padding: 2rem 1rem;
 }
+
+.brands h2 {
+  font-size: 3rem;
+}
+
 .brand-list {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 5rem;
   flex-wrap: wrap;
 }
 .brand-list img {
-  height: 60px;
+  height: 250px;
   object-fit: contain;
 }
 

@@ -3,30 +3,27 @@ import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/auth/auth.service';
+import { ProductService } from '../../services/product-service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './header.html',
-  styleUrl: './header.css',
+  styleUrls: ['./header.css'],
 })
 export class Header {
-  productCategories = [
-    { name: 'Mouse', link: '/products/mouse' },
-    { name: 'Keyboard', link: '/products/keyboard' },
-    { name: 'Monitor', link: '/products/monitor' },
-    { name: 'Laptop', link: '/products/laptop' },
-    { name: 'PC Component', link: '/products/components' },
-  ];
+  brands: string[] = [];
 
   private isBrowser: boolean;
 
   constructor(
     public authService: AuthService,
+    private productService: ProductService,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+    this.brands = this.productService.getBrands(); // auto‑load brands
   }
 
   get isLoggedIn(): boolean {
@@ -41,7 +38,6 @@ export class Header {
 
   logout(): void {
     if (!this.isBrowser) return;
-    
     if (confirm('Are you sure you want to logout?')) {
       this.authService.logout();
     }

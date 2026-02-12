@@ -10,9 +10,9 @@ import { CommonModule } from '@angular/common';
 })
 export class Carousel implements OnInit, OnDestroy {
   images = [
-    'assets/banner1.jpg',
-    'assets/banner2.jpg',
-    'assets/banner3.jpg'
+    'assets/banner1.png',
+    'assets/banner2.png',
+    'assets/banner3.png'
   ];
 
   currentIndex = 0;
@@ -43,7 +43,6 @@ export class Carousel implements OnInit, OnDestroy {
 
   next(): void {
     this.currentIndex = (this.currentIndex + 1) % this.images.length;
-    console.log('Switching to index:', this.currentIndex);
   }
 
   prev(): void {

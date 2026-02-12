@@ -1,3 +1,42 @@
-<app-header></app-header>
-<p>products works!</p>
-<app-footer></app-footer>
+<div class="products-page">
+  <app-header></app-header>
+
+  <div class="content">
+    <!-- Sidebar Filters -->
+    <aside class="filters">
+      <h3>Filter by Brand</h3>
+      <div *ngFor="let brand of brands">
+        <label>
+          <input
+            type="checkbox"
+            (change)="toggleBrand(brand)"
+            [checked]="selectedBrands.has(brand)"
+          />
+          {{ brand }}
+        </label>
+      </div>
+
+      <h3>Filter by Product Type</h3>
+      <div *ngFor="let type of types">
+        <label>
+          <input type="checkbox" (change)="toggleType(type)" [checked]="selectedTypes.has(type)" />
+          {{ type }}
+        </label>
+      </div>
+
+      <button (click)="resetFilters()">Reset Filters</button>
+    </aside>
+
+    <!-- Product Grid -->
+    <section class="product-grid">
+      <div class="product-card" *ngFor="let product of filteredProducts">
+        <img [src]="product.image" [alt]="product.name" />
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.brand }} - {{ product.type }}</p>
+        <p>${{ product.price }}</p>
+      </div>
+    </section>
+  </div>
+
+  <app-footer></app-footer>
+</div>
