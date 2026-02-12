@@ -1,0 +1,77 @@
+.carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.carousel-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease-in-out; /* Slide animation */
+}
+
+.carousel-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0; /* Prevent images from shrinking */
+  display: block;
+}
+
+.carousel-controls {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  z-index: 2;
+  padding: 0 1rem;
+}
+
+.carousel-controls button {
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: background 0.3s ease;
+  border-radius: 4px;
+}
+
+.carousel-controls button:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Dots indicator */
+.carousel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 2;
+}
+
+.carousel-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.carousel-dots span.active {
+  background: rgba(255, 255, 255, 1);
+  width: 30px;
+  border-radius: 6px;
+}
+
+.carousel-dots span:hover {
+  background: rgba(255, 255, 255, 0.8);
+}

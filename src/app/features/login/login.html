@@ -1,0 +1,146 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <!-- Logo/Header -->
+    <div class="auth-header">
+      <h1>{{ isLoginMode ? 'Welcome Back' : 'Create Account' }}</h1>
+      <p>{{ isLoginMode ? 'Login to your account' : 'Register to get started' }}</p>
+    </div>
+
+    <!-- Success Message -->
+    <div class="message success-message" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div class="message error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Login Form -->
+    <form *ngIf="isLoginMode" [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <input 
+          type="email" 
+          id="login-email" 
+          formControlName="email" 
+          placeholder="Enter your email"
+          [class.invalid]="loginEmail?.invalid && loginEmail?.touched">
+        <span class="error-text" *ngIf="loginEmail?.invalid && loginEmail?.touched">
+          <span *ngIf="loginEmail?.errors?.['required']">Email is required</span>
+          <span *ngIf="loginEmail?.errors?.['email']">Please enter a valid email</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <div class="password-wrapper">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="login-password" 
+            formControlName="password" 
+            placeholder="Enter your password"
+            [class.invalid]="loginPassword?.invalid && loginPassword?.touched">
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <span class="error-text" *ngIf="loginPassword?.invalid && loginPassword?.touched">
+          <span *ngIf="loginPassword?.errors?.['required']">Password is required</span>
+          <span *ngIf="loginPassword?.errors?.['minlength']">Password must be at least 6 characters</span>
+        </span>
+      </div>
+
+      <div class="form-options">
+        <label class="checkbox-label">
+          <input type="checkbox">
+          <span>Remember me</span>
+        </label>
+        <a href="#" class="forgot-password">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
+        Login
+      </button>
+    </form>
+
+    <!-- Register Form -->
+    <form *ngIf="!isLoginMode" [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
+      <div class="form-group">
+        <label for="register-name">Full Name</label>
+        <input 
+          type="text" 
+          id="register-name" 
+          formControlName="name" 
+          placeholder="Enter your full name"
+          [class.invalid]="registerName?.invalid && registerName?.touched">
+        <span class="error-text" *ngIf="registerName?.invalid && registerName?.touched">
+          <span *ngIf="registerName?.errors?.['required']">Name is required</span>
+          <span *ngIf="registerName?.errors?.['minlength']">Name must be at least 2 characters</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="register-email">Email Address</label>
+        <input 
+          type="email" 
+          id="register-email" 
+          formControlName="email" 
+          placeholder="Enter your email"
+          [class.invalid]="registerEmail?.invalid && registerEmail?.touched">
+        <span class="error-text" *ngIf="registerEmail?.invalid && registerEmail?.touched">
+          <span *ngIf="registerEmail?.errors?.['required']">Email is required</span>
+          <span *ngIf="registerEmail?.errors?.['email']">Please enter a valid email</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="register-password">Password</label>
+        <div class="password-wrapper">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="register-password" 
+            formControlName="password" 
+            placeholder="Create a password"
+            [class.invalid]="registerPassword?.invalid && registerPassword?.touched">
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <span class="error-text" *ngIf="registerPassword?.invalid && registerPassword?.touched">
+          <span *ngIf="registerPassword?.errors?.['required']">Password is required</span>
+          <span *ngIf="registerPassword?.errors?.['minlength']">Password must be at least 6 characters</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="register-confirm-password">Confirm Password</label>
+        <input 
+          [type]="showPassword ? 'text' : 'password'" 
+          id="register-confirm-password" 
+          formControlName="confirmPassword" 
+          placeholder="Confirm your password"
+          [class.invalid]="registerConfirmPassword?.invalid && registerConfirmPassword?.touched">
+        <span class="error-text" *ngIf="registerConfirmPassword?.invalid && registerConfirmPassword?.touched">
+          Password confirmation is required
+        </span>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="registerForm.invalid">
+        Create Account
+      </button>
+    </form>
+
+    <!-- Toggle between login and register -->
+    <div class="toggle-mode">
+      <p *ngIf="isLoginMode">
+        Don't have an account? 
+        <a href="#" (click)="toggleMode(); $event.preventDefault()">Register here</a>
+      </p>
+      <p *ngIf="!isLoginMode">
+        Already have an account? 
+        <a href="#" (click)="toggleMode(); $event.preventDefault()">Login here</a>
+      </p>
+    </div>
+  </div>
+</div>

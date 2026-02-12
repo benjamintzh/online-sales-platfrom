@@ -1,0 +1,50 @@
+.home-page {
+  background-color: beige;
+}
+
+.hero {
+  height: 90vh;
+}
+
+/* Brands */
+.brands {
+  border: 5px solid #000;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.brand-list {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.brand-list img {
+  height: 60px;
+  object-fit: contain;
+}
+
+/* Top Sales Products */
+.top-sales {
+  padding: 2rem 1rem;
+}
+.product-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.product-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  width: 200px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+.product-card img {
+  width: 100%;
+  border-radius: 4px;
+}
+.product-card h3 {
+  margin: 0.5rem 0;
+}
