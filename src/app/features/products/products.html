@@ -7,11 +7,7 @@
       <h3>Filter by Brand</h3>
       <div *ngFor="let brand of brands">
         <label>
-          <input
-            type="checkbox"
-            (change)="toggleBrand(brand)"
-            [checked]="selectedBrands.has(brand)"
-          />
+          <input type="checkbox" (change)="toggleBrand(brand)" [checked]="selectedBrands.has(brand)" />
           {{ brand }}
         </label>
       </div>
@@ -34,6 +30,16 @@
         <h3>{{ product.name }}</h3>
         <p>{{ product.brand }} - {{ product.type }}</p>
         <p>${{ product.price }}</p>
+        <div class="cart-controls">
+          <div class="quantity-selector">
+            <button (click)="decrement(product.id)">-</button>
+            <input type="number" [value]="getQuantity(product.id)" (change)="setQuantity(product.id, $event)" min="1" />
+            <button (click)="increment(product.id)">+</button>
+          </div>
+          <button class="add-to-cart-btn" (click)="addToCart(product)">
+            Add to Cart
+          </button>
+        </div>
       </div>
     </section>
   </div>
