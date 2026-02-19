@@ -104,7 +104,6 @@
   font-size: 0.95rem;
   font-weight: 500;
   background: transparent;
-  -moz-appearance: textfield;
 }
 
 .quantity-selector input::-webkit-outer-spin-button,
