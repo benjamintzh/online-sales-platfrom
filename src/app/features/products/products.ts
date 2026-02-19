@@ -26,7 +26,7 @@ export class Products implements OnInit {
   constructor(
     private productService: ProductService,
     private route: ActivatedRoute,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.products = this.productService.getProducts();
@@ -45,17 +45,17 @@ export class Products implements OnInit {
   }
 
   setQuantity(productId: number, event: Event): void {
-  const input = event.target as HTMLInputElement;
-  const value = parseInt(input.value, 10);
+    const input = event.target as HTMLInputElement;
+    const value = parseInt(input.value, 10);
 
-  if (!isNaN(value) && value >= 1) {
-    this.quantities.set(productId, value);
-  } else {
-    // Reset to 1 if invalid input
-    this.quantities.set(productId, 1);
-    input.value = '1';
+    if (!isNaN(value) && value >= 1) {
+      this.quantities.set(productId, value);
+    } else {
+      // Reset to 1 if invalid input
+      this.quantities.set(productId, 1);
+      input.value = '1';
+    }
   }
-}
 
   getQuantity(productId: number): number {
     return this.quantities.get(productId) ?? 1;
