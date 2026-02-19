@@ -47,20 +47,13 @@ export class Admin {
     showProductModal = false;
     showOrderModal = false;
 
-    // ── New User Form ───────────────────────────────────
-    newUser: Omit<User, 'id'> = {
-        name: '', email: '', role: 'Customer', status: 'Active', joined: ''
-    };
+    editingUserId: number | null = null;
+    editingProductId: number | null = null;
 
-    // ── New Product Form ────────────────────────────────
-    newProduct: Omit<AdminProduct, 'id'> = {
-        name: '', brand: '', type: '', price: 0, stock: 0
-    };
-
-    // ── New Order Form ──────────────────────────────────
-    newOrder: Omit<Order, 'id'> = {
-        customer: '', date: '', total: 0, status: 'Pending', items: 1
-    };
+    // ── Forms ───────────────────────────────────────────
+    newUser: Omit<User, 'id'> = { name: '', email: '', role: 'Customer', status: 'Active', joined: '' };
+    newProduct: Omit<AdminProduct, 'id'> = { name: '', brand: '', type: '', price: 0, stock: 0 };
+    newOrder: Omit<Order, 'id'> = { customer: '', date: '', total: 0, status: 'Pending', items: 1 };
 
     // ── Users ───────────────────────────────────────────
     users: User[] = [
@@ -79,8 +72,14 @@ export class Admin {
         );
     }
 
-    openUserModal(): void {
-        this.newUser = { name: '', email: '', role: 'Customer', status: 'Active', joined: new Date().toISOString().split('T')[0] };
+    openUserModal(user?: User): void {
+        if (user) {
+            this.editingUserId = user.id;
+            this.newUser = { name: user.name, email: user.email, role: user.role, status: user.status, joined: user.joined };
+        } else {
+            this.editingUserId = null;
+            this.newUser = { name: '', email: '', role: 'Customer', status: 'Active', joined: new Date().toISOString().split('T')[0] };
+        }
         this.showUserModal = true;
     }
 
@@ -89,8 +88,14 @@ export class Admin {
             alert('Name and Email are required.');
             return;
         }
-        const id = Math.max(...this.users.map(u => u.id), 0) + 1;
-        this.users = [...this.users, { id, ...this.newUser }];
+        if (this.editingUserId !== null) {
+            this.users = this.users.map(u =>
+                u.id === this.editingUserId ? { id: u.id, ...this.newUser } : u
+            );
+        } else {
+            const id = Math.max(...this.users.map(u => u.id), 0) + 1;
+            this.users = [...this.users, { id, ...this.newUser }];
+        }
         this.showUserModal = false;
     }
 
@@ -119,8 +124,14 @@ export class Admin {
         );
     }
 
-    openProductModal(): void {
-        this.newProduct = { name: '', brand: '', type: '', price: 0, stock: 0 };
+    openProductModal(product?: AdminProduct): void {
+        if (product) {
+            this.editingProductId = product.id;
+            this.newProduct = { name: product.name, brand: product.brand, type: product.type, price: product.price, stock: product.stock };
+        } else {
+            this.editingProductId = null;
+            this.newProduct = { name: '', brand: '', type: '', price: 0, stock: 0 };
+        }
         this.showProductModal = true;
     }
 
@@ -129,8 +140,14 @@ export class Admin {
             alert('Name and Brand are required.');
             return;
         }
-        const id = Math.max(...this.products.map(p => p.id), 0) + 1;
-        this.products = [...this.products, { id, ...this.newProduct }];
+        if (this.editingProductId !== null) {
+            this.products = this.products.map(p =>
+                p.id === this.editingProductId ? { id: p.id, ...this.newProduct } : p
+            );
+        } else {
+            const id = Math.max(...this.products.map(p => p.id), 0) + 1;
+            this.products = [...this.products, { id, ...this.newProduct }];
+        }
         this.showProductModal = false;
     }
 
@@ -169,22 +186,20 @@ export class Admin {
     }
 
     openOrderModal(): void {
-        this.newOrder = {
-            customer: '', date: new Date().toISOString().split('T')[0],
-            total: 0, status: 'Pending', items: 1
-        };
+        this.newOrder = { customer: '', date: new Date().toISOString().split('T')[0], total: 0, status: 'Pending', items: 1 };
         this.showOrderModal = true;
     }
 
     saveOrder(): void {
-        if (!this.newOrder.customer.trim()) {
-            alert('Customer name is required.');
-            return;
-        }
+        if (!this.newOrder.customer.trim()) { alert('Customer name is required.'); return; }
         const nextNum = this.orders.length + 1;
         const id = `ORD-${String(nextNum).padStart(3, '0')}`;
         this.orders = [...this.orders, { id, ...this.newOrder }];
         this.showOrderModal = false;
+    }
+
+    deleteOrder(id: string): void {
+        if (confirm(`Delete order ${id}?`)) this.orders = this.orders.filter(o => o.id !== id);
     }
 
     updateOrderStatus(order: Order, status: string): void {
@@ -193,16 +208,13 @@ export class Admin {
 
     statusClass(status: OrderStatus): string {
         const map: Record<OrderStatus, string> = {
-            Pending: 'badge-warning',
-            Processing: 'badge-info',
-            Shipped: 'badge-primary',
-            Delivered: 'badge-success',
-            Cancelled: 'badge-danger',
+            Pending: 'badge-warning', Processing: 'badge-info',
+            Shipped: 'badge-primary', Delivered: 'badge-success', Cancelled: 'badge-danger',
         };
         return map[status];
     }
 
-    // ── Dashboard Stats ─────────────────────────────────
+    // ── Dashboard ───────────────────────────────────────
     get totalRevenue(): number {
         return this.orders.filter(o => o.status === 'Delivered').reduce((s, o) => s + o.total, 0);
     }
@@ -210,6 +222,10 @@ export class Admin {
     get pendingOrders(): number {
         return this.orders.filter(o => o.status === 'Pending' || o.status === 'Processing').length;
     }
-
     setTab(tab: Tab): void { this.activeTab = tab; }
+
+    get userModalTitle(): string { return this.editingUserId ? 'Edit User' : 'Create User'; }
+    get productModalTitle(): string { return this.editingProductId ? 'Edit Product' : 'Create Product'; }
+    get userSaveLabel(): string { return this.editingUserId ? 'Save Changes' : 'Create User'; }
+    get productSaveLabel(): string { return this.editingProductId ? 'Save Changes' : 'Create Product'; }
 }

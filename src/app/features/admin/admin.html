@@ -139,6 +139,8 @@
                                         user.status }}</span></td>
                                 <td class="muted">{{ user.joined }}</td>
                                 <td class="actions-cell">
+                                    <!-- 👇 passes user into openUserModal -->
+                                    <button class="action-btn edit-btn" (click)="openUserModal(user)">Edit</button>
                                     <button class="action-btn toggle-btn" (click)="toggleUserStatus(user)">
                                         {{ user.status === 'Active' ? 'Deactivate' : 'Activate' }}
                                     </button>
@@ -186,7 +188,9 @@
                                 <td><span class="badge" [ngClass]="stockClass(product.stock)">{{
                                         stockLabel(product.stock) }} ({{ product.stock }})</span></td>
                                 <td class="actions-cell">
-                                    <button class="action-btn edit-btn">Edit</button>
+                                    <!-- 👇 passes product into openProductModal -->
+                                    <button class="action-btn edit-btn"
+                                        (click)="openProductModal(product)">Edit</button>
                                     <button class="action-btn delete-btn"
                                         (click)="deleteProduct(product.id)">Delete</button>
                                 </td>
@@ -220,6 +224,7 @@
                                 <th>Total</th>
                                 <th>Status</th>
                                 <th>Update Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -237,9 +242,14 @@
                                         <option *ngFor="let s of orderStatuses" [value]="s">{{ s }}</option>
                                     </select>
                                 </td>
+                                <!-- 👇 delete button -->
+                                <td class="actions-cell">
+                                    <button class="action-btn delete-btn"
+                                        (click)="deleteOrder(order.id)">Delete</button>
+                                </td>
                             </tr>
                             <tr *ngIf="filteredOrders.length === 0">
-                                <td colspan="7" class="empty-row">No orders found.</td>
+                                <td colspan="8" class="empty-row">No orders found.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -254,7 +264,7 @@
 <div class="modal-overlay" *ngIf="showUserModal" (click)="showUserModal = false">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 class="modal-title">Create User</h2>
+            <h2 class="modal-title">{{ userModalTitle }}</h2>
             <button class="modal-close" (click)="showUserModal = false">✕</button>
         </div>
         <div class="modal-body">
@@ -289,7 +299,7 @@
         </div>
         <div class="modal-footer">
             <button class="modal-cancel" (click)="showUserModal = false">Cancel</button>
-            <button class="modal-save" (click)="saveUser()">Create User</button>
+            <button class="modal-save" (click)="saveUser()">{{ userSaveLabel }}</button>
         </div>
     </div>
 </div>
@@ -298,7 +308,7 @@
 <div class="modal-overlay" *ngIf="showProductModal" (click)="showProductModal = false">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 class="modal-title">Create Product</h2>
+            <h2 class="modal-title">{{ productModalTitle }}</h2>
             <button class="modal-close" (click)="showProductModal = false">✕</button>
         </div>
         <div class="modal-body">
@@ -329,7 +339,7 @@
         </div>
         <div class="modal-footer">
             <button class="modal-cancel" (click)="showProductModal = false">Cancel</button>
-            <button class="modal-save" (click)="saveProduct()">Create Product</button>
+            <button class="modal-save" (click)="saveProduct()">{{ productSaveLabel }}</button>
         </div>
     </div>
 </div>
