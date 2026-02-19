@@ -1,0 +1,106 @@
+<app-header />
+
+<main class="checkout-page">
+    <div class="checkout-container">
+
+        <a routerLink="/cart" class="back-link">← Checkout</a>
+
+        <div class="subtotal-bar">
+            <span class="subtotal-label">Sub-Total :</span>
+            <span class="subtotal-value">RM {{ subtotal.toFixed(2) }}</span>
+        </div>
+
+        <div class="mode-toggle">
+            <button class="mode-btn" [class.active]="deliveryMode === 'deliver'" (click)="setMode('deliver')">
+                Item Delivering
+            </button>
+            <button class="mode-btn" [class.active]="deliveryMode === 'pickup'" (click)="setMode('pickup')">
+                Self-Pickup
+            </button>
+        </div>
+
+        <ng-container *ngIf="deliveryMode === 'deliver'">
+            <div class="section-header">
+                <h2 class="section-title">Shipping Address</h2>
+            </div>
+
+            <div class="address-form">
+                <div class="form-row three-col">
+                    <div class="field">
+                        <input type="text" placeholder="Full Name" [(ngModel)]="form.fullName"
+                            [class.invalid]="isInvalid('fullName')" />
+                    </div>
+                    <div class="field">
+                        <input type="text" placeholder="Phone Number" [(ngModel)]="form.phone" [pattern]="numberPattern"
+                            [class.invalid]="isInvalid('phone')" />
+                    </div>
+                    <div class="field">
+                        <input type="email" placeholder="Email" [(ngModel)]="form.email"
+                            [class.invalid]="isInvalid('email')" />
+                    </div>
+                </div>
+
+                <div class="form-row one-col">
+                    <div class="field">
+                        <input type="text" placeholder="Address 1" [(ngModel)]="form.address1"
+                            [class.invalid]="isInvalid('address1')" />
+                    </div>
+                </div>
+
+                <div class="form-row one-col">
+                    <div class="field">
+                        <input type="text" placeholder="Address 2 (Optional)" [(ngModel)]="form.address2" />
+                    </div>
+                </div>
+
+                <div class="form-row four-col">
+                    <div class="field">
+                        <input type="text" placeholder="Postal Code" [(ngModel)]="form.postalCode"
+                            [pattern]="numberPattern" [class.invalid]="isInvalid('postalCode')" />
+                    </div>
+                    <div class="field">
+                        <input type="text" placeholder="City" [(ngModel)]="form.city"
+                            [class.invalid]="isInvalid('city')" />
+                    </div>
+                    <div class="field">
+                        <input type="text" placeholder="State" [(ngModel)]="form.state"
+                            [class.invalid]="isInvalid('state')" />
+                    </div>
+                    <div class="field">
+                        <input type="text" placeholder="Country" [(ngModel)]="form.country"
+                            [class.invalid]="isInvalid('country')" />
+                    </div>
+                </div>
+            </div>
+
+        </ng-container>
+
+        <ng-container *ngIf="deliveryMode === 'pickup'">
+            <div class="pickup-notice">
+                <p>📍 You have selected <strong>Self-Pickup</strong>. Please collect your order at our store.</p>
+            </div>
+        </ng-container>
+
+        <div class="fee-summary">
+            <ng-container *ngIf="deliveryMode === 'deliver'">
+                <div class="fee-row">
+                    <span>Shipping Fee</span>
+                    <span>RM {{ shippingFee.toFixed(2) }}</span>
+                </div>
+                <div class="divider"></div>
+            </ng-container>
+            <div class="fee-row total-row">
+                <span>Total</span>
+                <span>RM {{ total.toFixed(2) }}</span>
+            </div>
+            <div class="divider"></div>
+        </div>
+
+        <div class="actions">
+            <button class="pay-btn" (click)="proceedToPayment()">Proceed to Payment</button>
+        </div>
+
+    </div>
+</main>
+
+<app-footer />

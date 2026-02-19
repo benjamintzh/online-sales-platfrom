@@ -36,8 +36,8 @@
             <input type="number" [value]="getQuantity(product.id)" (change)="setQuantity(product.id, $event)" min="1" />
             <button (click)="increment(product.id)">+</button>
           </div>
-          <button class="add-to-cart-btn" (click)="addToCart(product)">
-            Add to Cart
+          <button class="add-to-cart-btn" (click)="addToCart(product)" [class.added]="isAdded(product.id)">
+            {{ isAdded(product.id) ? '✓ Added!' : 'Add to Cart' }}
           </button>
         </div>
       </div>

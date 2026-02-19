@@ -1,69 +1,52 @@
 <app-header />
 
 <main class="cart-page">
-    <h1 class="cart-title">Your Cart</h1>
+    <h1 class="cart-title">Shopping Cart</h1>
 
     <ng-container *ngIf="items.length > 0; else emptyCart">
-        <div class="cart-layout">
 
-            <!-- Items -->
-            <section class="cart-items">
-                <div class="cart-item" *ngFor="let item of items">
-                    <img [src]="item.image" [alt]="item.name" class="item-img" />
+        <div class="cart-items">
+            <div class="cart-item" *ngFor="let item of items; let i = index">
 
-                    <div class="item-info">
-                        <h3>{{ item.name }}</h3>
-                        <p class="item-meta">{{ item.brand }} · {{ item.type }}</p>
-                        <p class="item-price">${{ item.price.toFixed(2) }}</p>
-                    </div>
+                <span class="item-index">{{ i + 1 }}.</span>
 
-                    <div class="item-controls">
+                <img [src]="item.image" [alt]="item.name" class="item-img" />
+
+                <div class="item-info">
+                    <h3>{{ item.name }}</h3>
+                    <div class="item-bottom">
                         <div class="quantity-selector">
-                            <button (click)="decrement(item)">-</button>
                             <input type="number" [value]="item.quantity" (change)="updateQuantity(item.id, $event)"
                                 min="1" />
-                            <button (click)="increment(item)">+</button>
+                            <div class="qty-arrows">
+                                <button (click)="increment(item)">▲</button>
+                                <button (click)="decrement(item)">▼</button>
+                            </div>
                         </div>
-                        <p class="item-total">${{ (item.price * item.quantity).toFixed(2) }}</p>
-                    </div>
-
-                    <button class="remove-btn" (click)="removeItem(item.id)" title="Remove">✕</button>
-                </div>
-            </section>
-
-            <!-- Order Summary -->
-            <aside class="cart-summary">
-                <h2>Order Summary</h2>
-
-                <div class="summary-items">
-                    <div class="summary-item-row" *ngFor="let item of items">
-                        <span class="summary-item-name">{{ item.name }} <span class="summary-qty">x{{ item.quantity
-                                }}</span></span>
-                        <span>${{ (item.price * item.quantity).toFixed(2) }}</span>
+                        <span class="item-price">RM {{ (item.price * item.quantity).toFixed(2) }}</span>
                     </div>
                 </div>
 
-                <div class="summary-divider"></div>
+                <button class="remove-btn" (click)="removeItem(item.id)" title="Remove">
+                    🗑
+                </button>
 
-                <div class="summary-row">
-                    <span>Subtotal</span>
-                    <span>${{ subtotal.toFixed(2) }}</span>
-                </div>
-                <div class="summary-row">
-                    <span>Tax (8%)</span>
-                    <span>${{ tax.toFixed(2) }}</span>
-                </div>
-                <div class="summary-row total-row">
-                    <span>Total</span>
-                    <span>${{ total.toFixed(2) }}</span>
-                </div>
-
-                <button class="checkout-btn">Proceed to Checkout</button>
-                <button class="clear-btn" (click)="clearCart()">Clear Cart</button>
-                <a routerLink="/products" class="continue-link">← Continue Shopping</a>
-            </aside>
-
+            </div>
         </div>
+
+        <div class="cart-divider"></div>
+
+        <div class="subtotal-row">
+            <span class="subtotal-label">Sub-Total :</span>
+            <span class="subtotal-value">RM {{ subtotal.toFixed(2) }}</span>
+        </div>
+
+        <div class="cart-divider"></div>
+
+        <div class="checkout-row">
+            <button class="checkout-btn" routerLink="/checkout">Checkout</button>
+        </div>
+
     </ng-container>
 
     <ng-template #emptyCart>

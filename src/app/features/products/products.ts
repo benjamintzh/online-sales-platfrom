@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Header } from '../../shared/header/header';
 import { Footer } from '../../shared/footer/footer';
 import { ProductService, Product } from '../../services/product-service';
+import { CartService } from '../../services/cart-service';
 
 @Component({
   selector: 'app-products',
@@ -14,15 +15,17 @@ import { ProductService, Product } from '../../services/product-service';
   styleUrls: ['./products.css'],
 })
 export class Products implements OnInit {
+  private cartService = inject(CartService);
+
   products: Product[] = [];
   filteredProducts: Product[] = [];
   brands: string[] = [];
   types: string[] = [];
-
   selectedBrands: Set<string> = new Set();
   selectedTypes: Set<string> = new Set();
-
   quantities: Map<number, number> = new Map();
+  addedToCart: Set<number> = new Set();
+
   constructor(
     private productService: ProductService,
     private route: ActivatedRoute,
@@ -33,7 +36,6 @@ export class Products implements OnInit {
     this.brands = this.productService.getBrands();
     this.types = this.productService.getTypes();
 
-    // React to both /products and /products/:brand
     this.route.paramMap.subscribe((params) => {
       const brand = params.get('brand');
       this.selectedBrands.clear();
@@ -47,11 +49,9 @@ export class Products implements OnInit {
   setQuantity(productId: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = parseInt(input.value, 10);
-
     if (!isNaN(value) && value >= 1) {
       this.quantities.set(productId, value);
     } else {
-      // Reset to 1 if invalid input
       this.quantities.set(productId, 1);
       input.value = '1';
     }
@@ -67,15 +67,22 @@ export class Products implements OnInit {
 
   decrement(productId: number): void {
     const current = this.getQuantity(productId);
-    if (current > 1) {
-      this.quantities.set(productId, current - 1);
-    }
+    if (current > 1) this.quantities.set(productId, current - 1);
   }
 
   addToCart(product: Product): void {
     const quantity = this.getQuantity(product.id);
-    console.log(`Added ${quantity}x ${product.name} to cart`);
-    // this.cartService.addItem({ ...product, quantity });
+    this.cartService.addItem(product, quantity);
+
+    alert(`${product.name} x${quantity} has been added to Cart`);
+
+    this.addedToCart.add(product.id);
+    this.quantities.delete(product.id);
+    setTimeout(() => this.addedToCart.delete(product.id), 1500);
+  }
+
+  isAdded(productId: number): boolean {
+    return this.addedToCart.has(productId);
   }
 
   toggleBrand(brand: string): void {

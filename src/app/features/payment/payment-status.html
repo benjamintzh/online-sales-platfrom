@@ -1,0 +1,35 @@
+<app-header />
+
+<main class="status-page">
+    <div class="status-container">
+
+        <!-- Checking State -->
+        <ng-container *ngIf="status === 'checking'">
+            <div class="spinner-wrapper">
+                <div class="spinner"></div>
+            </div>
+            <h2 class="status-title">Verifying Payment</h2>
+            <p class="status-sub">Please wait while we confirm your payment...</p>
+        </ng-container>
+
+        <!-- Success State -->
+        <ng-container *ngIf="status === 'success'">
+            <div class="check-wrapper">
+                <div class="checkmark">
+                    <svg viewBox="0 0 52 52">
+                        <circle class="check-circle" cx="26" cy="26" r="25" fill="none" />
+                        <path class="check-tick" fill="none" d="M14 27l9 9 16-18" />
+                    </svg>
+                </div>
+            </div>
+            <h2 class="status-title success">Payment Completed!</h2>
+            <p class="status-sub">
+                Your order has been confirmed. Redirecting in
+                <strong>{{ countdown }}s</strong>...
+            </p>
+        </ng-container>
+
+    </div>
+</main>
+
+<app-footer />
