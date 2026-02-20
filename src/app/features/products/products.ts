@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Header } from '../../shared/header/header';
 import { Footer } from '../../shared/footer/footer';
 import { ProductService, Product } from '../../services/product-service';
+import { Router } from '@angular/router';
 import { CartService } from '../../services/cart-service';
 
 @Component({
@@ -29,7 +30,8 @@ export class Products implements OnInit {
   constructor(
     private productService: ProductService,
     private route: ActivatedRoute,
-  ) { }
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.products = this.productService.getProducts();
@@ -115,5 +117,9 @@ export class Products implements OnInit {
 
   private capitalize(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  viewProduct(product: Product): void {
+    this.router.navigate(['/products', product.brand.toLowerCase(), product.id]);
   }
 }

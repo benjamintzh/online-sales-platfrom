@@ -9,10 +9,18 @@
   <section class="brands">
     <h2>Our Brands</h2>
     <div class="brand-list">
-      <img src="assets/logo/asus-logo.jpeg" alt="Asus" />
-      <img src="assets/logo/dell-logo.jpg" alt="Dell" />
-      <img src="assets/logo/lenovo-logo.jpg" alt="Lenovo" />
-      <img src="assets/logo/logitech-logo.jpg" alt="Logitech" />
+      <img
+        *ngFor="let brand of visibleBrands"
+        [src]="'assets/logo/' + brand.toLowerCase() + '-logo.jpg'"
+        [alt]="brand"
+        (click)="goToBrand(brand)"
+        class="brand-logo"
+      />
+    </div>
+
+    <div class="brand-controls" *ngIf="brands.length > 4">
+      <button (click)="prevBrand()">‹</button>
+      <button (click)="nextBrand()">›</button>
     </div>
   </section>
 
