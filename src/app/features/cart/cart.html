@@ -1,60 +1,58 @@
-<app-header />
-
-<main class="cart-page">
+<div class="page-wrapper">
+  <app-header />
+  <main class="cart-page">
     <h1 class="cart-title">Shopping Cart</h1>
 
     <ng-container *ngIf="items.length > 0; else emptyCart">
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let item of items; let i = index">
+          <span class="item-index">{{ i + 1 }}.</span>
 
-        <div class="cart-items">
-            <div class="cart-item" *ngFor="let item of items; let i = index">
+          <img [src]="item.image" [alt]="item.name" class="item-img" />
 
-                <span class="item-index">{{ i + 1 }}.</span>
-
-                <img [src]="item.image" [alt]="item.name" class="item-img" />
-
-                <div class="item-info">
-                    <h3>{{ item.name }}</h3>
-                    <div class="item-bottom">
-                        <div class="quantity-selector">
-                            <input type="number" [value]="item.quantity" (change)="updateQuantity(item.id, $event)"
-                                min="1" />
-                            <div class="qty-arrows">
-                                <button (click)="increment(item)">▲</button>
-                                <button (click)="decrement(item)">▼</button>
-                            </div>
-                        </div>
-                        <span class="item-price">RM {{ (item.price * item.quantity).toFixed(2) }}</span>
-                    </div>
+          <div class="item-info">
+            <h3>{{ item.name }}</h3>
+            <div class="item-bottom">
+              <div class="quantity-selector">
+                <input
+                  type="number"
+                  [value]="item.quantity"
+                  (change)="updateQuantity(item.id, $event)"
+                  min="1"
+                />
+                <div class="qty-arrows">
+                  <button (click)="increment(item)">▲</button>
+                  <button (click)="decrement(item)">▼</button>
                 </div>
-
-                <button class="remove-btn" (click)="removeItem(item.id)" title="Remove">
-                    🗑
-                </button>
-
+              </div>
+              <span class="item-price">RM {{ (item.price * item.quantity).toFixed(2) }}</span>
             </div>
+          </div>
+
+          <button class="remove-btn" (click)="removeItem(item.id)" title="Remove">🗑</button>
         </div>
+      </div>
 
-        <div class="cart-divider"></div>
+      <div class="cart-divider"></div>
 
-        <div class="subtotal-row">
-            <span class="subtotal-label">Sub-Total :</span>
-            <span class="subtotal-value">RM {{ subtotal.toFixed(2) }}</span>
-        </div>
+      <div class="subtotal-row">
+        <span class="subtotal-label">Sub-Total :</span>
+        <span class="subtotal-value">RM {{ subtotal.toFixed(2) }}</span>
+      </div>
 
-        <div class="cart-divider"></div>
+      <div class="cart-divider"></div>
 
-        <div class="checkout-row">
-            <button class="checkout-btn" routerLink="/checkout">Checkout</button>
-        </div>
-
+      <div class="checkout-row">
+        <button class="checkout-btn" routerLink="/checkout">Checkout</button>
+      </div>
     </ng-container>
 
     <ng-template #emptyCart>
-        <div class="empty-cart">
-            <p>🛒 Your cart is empty.</p>
-            <a routerLink="/products" class="continue-link">Browse Products</a>
-        </div>
+      <div class="empty-cart">
+        <p>🛒 Your cart is empty.</p>
+        <a routerLink="/products" class="continue-link">Browse Products</a>
+      </div>
     </ng-template>
-</main>
-
-<app-footer />
+  </main>
+  <app-footer />
+</div>

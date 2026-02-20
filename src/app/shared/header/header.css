@@ -1,20 +1,8 @@
 .site-header {
-  background: #0078d4;
+  background: #003153;
   color: white;
   padding: 0.5rem 10rem;
   position: relative;
-}
-
-:host-context(.home-page) .site-header {
-  background-color: #fffafa;
-}
-
-:host-context(.home-page) .logo-text {
-  color: #000;
-}
-
-:host-context(.home-page) .nav-links a {
-  color: #000;
 }
 
 .navbar {
@@ -61,23 +49,8 @@
 }
 
 .nav-links a:hover {
+  color: #E3C79F;
   text-decoration: none;
-}
-
-/* User greeting */
-.user-section {
-  display: flex;
-  align-items: center;
-}
-
-.user-greeting {
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-:host-context(.home-page) .user-greeting {
-  color: #000;
 }
 
 /* Dropdown */
@@ -87,8 +60,8 @@
 
 .dropdown-menu {
   position: absolute;
-  background: rgb(206, 206, 206);
-  color: black;
+  background: #064775;
+  color: #E3C79F;
   list-style: none;
   padding: 1rem 10rem;
   margin: 0;
@@ -115,14 +88,14 @@
 }
 
 .dropdown-menu li a {
-  color: black;
+  color: #FFF;
   text-decoration: none;
   display: block;
   white-space: nowrap;
 }
 
 .dropdown-menu li a:hover {
-  background: #f0f0f0;
+  color: #E3C79F;
   border-radius: 4px;
 }
 
