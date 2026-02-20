@@ -1,0 +1,27 @@
+<div class="view-product-page">
+  <app-header></app-header>
+
+  <section class="product-details" *ngIf="product">
+    <!-- Title -->
+    <h1 class="product-title">{{ product.name }}</h1>
+
+    <div class="details-layout">
+      <!-- Left: Image -->
+      <div class="image-section">
+        <img [src]="product.image" [alt]="product.name" />
+      </div>
+
+      <!-- Right: Details -->
+      <div class="info-section">
+        <p><strong>Brand:</strong> {{ product.brand }}</p>
+        <p><strong>Type:</strong> {{ product.type }}</p>
+        <p><strong>Price:</strong> ${{ product.price }}</p>
+        <p><strong>Quantity:</strong> 1</p>
+
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <app-footer></app-footer>
+</div>

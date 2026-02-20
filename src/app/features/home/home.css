@@ -3,28 +3,55 @@
 }
 
 .hero {
+  padding: 2rem;
   height: 90vh;
 }
 
 /* Brands */
 .brands {
   text-align: center;
-  padding: 2rem 1rem;
+  margin: 2rem 0;
 }
 
 .brands h2 {
-  font-size: 3rem;
+  font-size: 2.6rem;
 }
 
 .brand-list {
   display: flex;
   justify-content: center;
-  gap: 5rem;
-  flex-wrap: wrap;
+  gap: 2rem;
 }
-.brand-list img {
-  height: 250px;
-  object-fit: contain;
+
+.brand-logo {
+  width: 250px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.brand-logo:hover {
+  transform: scale(1.1);
+}
+
+.brand-controls {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.brand-controls button {
+  background: #0078d4;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.brand-controls button:hover {
+  background: #005a9e;
 }
 
 /* Top Sales Products */
