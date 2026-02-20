@@ -1,0 +1,37 @@
+<app-header />
+
+<main class="payment-page">
+    <div class="payment-container">
+
+        <a routerLink="/checkout" class="back-link">← Payment</a>
+        <p class="subtitle">How would you like to pay?</p>
+
+        <div class="methods-list">
+            <div class="method-row" *ngFor="let method of paymentMethods" [class.selected]="isSelected(method.id)"
+                (click)="select(method.id)">
+                <div class="method-left">
+                    <div class="checkbox" [class.checked]="isSelected(method.id)">
+                        <span *ngIf="isSelected(method.id)">✓</span>
+                    </div>
+                    <span class="method-label">{{ method.label }}</span>
+                </div>
+
+                <div>
+                    <img [src]="method.logo" [alt]="method.logoAlt" [style.width]="method.width"
+                        [style.height]="method.height">
+                </div>
+            </div>
+        </div>
+
+        <p class="error-msg" *ngIf="submitted && !selectedMethod">
+            Please select a payment method.
+        </p>
+
+        <div class="actions">
+            <button class="continue-btn" (click)="continue()">Continue</button>
+        </div>
+
+    </div>
+</main>
+
+<app-footer />

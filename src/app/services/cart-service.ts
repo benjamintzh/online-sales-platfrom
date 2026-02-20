@@ -31,6 +31,15 @@ export class CartService {
         return this.itemsSubject.getValue();
     }
 
+    addItem(product: { id: number; name: string; brand: string; type: string; price: number; image: string }, quantity: number): void {
+        const existing = this.items.find(i => i.id === product.id);
+        if (existing) {
+            this.updateQuantity(product.id, existing.quantity + quantity);
+        } else {
+            this.itemsSubject.next([...this.items, { ...product, quantity }]);
+        }
+    }
+
     updateQuantity(itemId: number, quantity: number): void {
         this.itemsSubject.next(
             this.items.map((i) => (i.id === itemId ? { ...i, quantity } : i))

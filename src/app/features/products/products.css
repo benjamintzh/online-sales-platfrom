@@ -126,7 +126,6 @@
   border: none;
   outline: none;
   background: transparent;
-  -moz-appearance: textfield; /* hides arrows in Firefox */
 }
 
 /* hides arrows in Chrome/Safari/Edge */
