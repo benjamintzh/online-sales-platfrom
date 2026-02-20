@@ -1,27 +1,99 @@
-<div class="view-product-page">
-  <app-header></app-header>
+<app-header />
 
-  <section class="product-details" *ngIf="product">
-    <!-- Title -->
-    <h1 class="product-title">{{ product.name }}</h1>
+<main class="view-product-page">
+
+  <ng-container *ngIf="product; else notFound">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a routerLink="/products">Products</a>
+      <span class="crumb-sep">›</span>
+      <a [routerLink]="['/products', product.brand.toLowerCase()]">{{ product.brand }}</a>
+      <span class="crumb-sep">›</span>
+      <span>{{ product.name }}</span>
+    </nav>
 
     <div class="details-layout">
+
       <!-- Left: Image -->
       <div class="image-section">
-        <img [src]="product.image" [alt]="product.name" />
+        <div class="image-wrapper">
+          <img [src]="product.image" [alt]="product.name" />
+        </div>
       </div>
 
-      <!-- Right: Details -->
+      <!-- Right: Info -->
       <div class="info-section">
-        <p><strong>Brand:</strong> {{ product.brand }}</p>
-        <p><strong>Type:</strong> {{ product.type }}</p>
-        <p><strong>Price:</strong> ${{ product.price }}</p>
-        <p><strong>Quantity:</strong> 1</p>
 
-        <button class="add-to-cart">Add to Cart</button>
+        <div class="product-meta">
+          <span class="product-brand">{{ product.brand }}</span>
+          <span class="product-type-badge">{{ product.type }}</span>
+        </div>
+
+        <h1 class="product-title">{{ product.name }}</h1>
+        <p class="product-price">RM {{ product.price.toFixed(2) }}</p>
+
+        <div class="divider"></div>
+
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="info-label">Brand</span>
+            <span class="info-value">{{ product.brand }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Category</span>
+            <span class="info-value">{{ product.type }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Availability</span>
+            <span class="info-value" [class.in-stock]="stockStatus === 'in'" [class.low-stock]="stockStatus === 'low'"
+              [class.out-of-stock]="stockStatus === 'out'">
+              <ng-container *ngIf="stockStatus === 'in'">✓ In Stock</ng-container>
+              <ng-container *ngIf="stockStatus === 'low'">⚠ Low Stock</ng-container>
+              <ng-container *ngIf="stockStatus === 'out'">✕ Out of Stock</ng-container>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Qty Left</span>
+            <span class="info-value">
+              <span class="stock-bar-wrapper">
+                <span class="stock-bar">
+                  <span class="stock-bar-fill" [class.fill-low]="stockStatus === 'low'"
+                    [class.fill-out]="stockStatus === 'out'" [style.width.%]="(product.stock / 50) * 100"></span>
+                </span>
+                <span class="stock-number">{{ product.stock }} remaining</span>
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <!-- disable add to cart when out of stock -->
+        <div class="cart-controls">
+          <div class="quantity-selector">
+            <button (click)="decrement()" [disabled]="quantity <= 1">−</button>
+            <input type="number" [value]="quantity" (change)="setQuantity($event)" [max]="product.stock" min="1" />
+            <button (click)="increment()" [disabled]="quantity >= product.stock">+</button>
+          </div>
+
+          <button class="add-to-cart-btn" [class.added]="added" [disabled]="product.stock === 0" (click)="addToCart()">
+            <ng-container *ngIf="product.stock === 0">Out of Stock</ng-container>
+            <ng-container *ngIf="product.stock > 0">
+              Add to Cart
+            </ng-container>
+          </button>
+        </div>
       </div>
     </div>
-  </section>
 
-  <app-footer></app-footer>
-</div>
+  </ng-container>
+
+  <ng-template #notFound>
+    <div class="not-found">
+      <p>Product not found.</p>
+      <a routerLink="/products" class="back-link">← Back to Products</a>
+    </div>
+  </ng-template>
+
+</main>
+
+<app-footer />

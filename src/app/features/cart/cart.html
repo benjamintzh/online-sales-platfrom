@@ -7,24 +7,30 @@
 
         <div class="cart-items">
             <div class="cart-item" *ngFor="let item of items; let i = index">
-
                 <span class="item-index">{{ i + 1 }}.</span>
-
                 <img [src]="item.image" [alt]="item.name" class="item-img" />
 
                 <div class="item-info">
                     <h3>{{ item.name }}</h3>
-                    <div class="item-bottom">
-                        <div class="quantity-selector">
-                            <input type="number" [value]="item.quantity" (change)="updateQuantity(item.id, $event)"
-                                min="1" />
-                            <div class="qty-arrows">
-                                <button (click)="increment(item)">▲</button>
-                                <button (click)="decrement(item)">▼</button>
-                            </div>
-                        </div>
-                        <span class="item-price">RM {{ (item.price * item.quantity).toFixed(2) }}</span>
+                    <p class="item-meta">{{ item.brand }} · {{ item.type }}</p>
+                    <p class="item-price">RM {{ item.price.toFixed(2) }}</p>
+                    <p class="item-stock" [class.stock-low]="item.stock <= 10 && item.stock > 0"
+                        [class.stock-out]="item.stock === 0">
+                        <ng-container *ngIf="item.stock === 0">✕ Out of Stock</ng-container>
+                        <ng-container *ngIf="item.stock > 0 && item.stock <= 10">⚠ Only {{ item.stock }}
+                            left</ng-container>
+                        <ng-container *ngIf="item.stock > 10">✓ In Stock ({{ item.stock }} available)</ng-container>
+                    </p>
+                </div>
+
+                <div class="item-controls">
+                    <div class="quantity-selector">
+                        <button (click)="decrement(item)" [disabled]="item.quantity <= 1">-</button>
+                        <input type="number" [value]="item.quantity" (change)="updateQuantity(item.id, $event)"
+                            [max]="item.stock" min="1" />
+                        <button (click)="increment(item)" [disabled]="item.quantity >= item.stock">+</button>
                     </div>
+                    <p class="item-total">RM {{ (item.price * item.quantity).toFixed(2) }}</p>
                 </div>
 
                 <button class="remove-btn" (click)="removeItem(item.id)" title="Remove">
