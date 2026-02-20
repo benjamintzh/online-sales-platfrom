@@ -178,7 +178,6 @@
   font-weight: 600;
   color: #0f172a;
   background: #fff;
-  -moz-appearance: textfield;
 }
 
 .quantity-selector input::-webkit-outer-spin-button,
