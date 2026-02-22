@@ -21,8 +21,12 @@ export class Home implements OnInit {
   constructor(private productService: ProductService, private router: Router) {}
 
   ngOnInit(): void {
-    this.brands = this.productService.getBrands();
-    this.updateVisibleBrands();
+    this.productService.getBrands().subscribe({
+      next: brands => {
+        this.brands = brands;
+        this.updateVisibleBrands();
+      },
+    });
   }
 
   updateVisibleBrands(): void {

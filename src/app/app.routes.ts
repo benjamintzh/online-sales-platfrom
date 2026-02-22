@@ -1,11 +1,14 @@
 import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Cart } from './features/cart/cart';
 import { Checkout } from './features/checkout/checkout';
 import { Payment } from './features/payment/payment';
 import { PaymentStatus } from './features/payment/payment-status';
 import { Order } from './features/order/order';
-import { Admin } from './features/admin/admin'
-
+import { Admin } from './features/admin/admin';
+import { authGuard } from './core/auth/auth.guard';
+import { AuthService } from './core/auth/auth.service';
 
 export const routes: Routes = [
   {
@@ -34,28 +37,38 @@ export const routes: Routes = [
   },
   {
     path: 'cart',
-    component: Cart
+    component: Cart,
+    canActivate: [authGuard],
   },
   {
     path: 'checkout',
-    component: Checkout
+    component: Checkout,
+    canActivate: [authGuard],
   },
   {
     path: 'payment',
-    component: Payment
+    component: Payment,
+    canActivate: [authGuard],
   },
   {
     path: 'payment/status',
-    component: PaymentStatus
+    component: PaymentStatus,
+    canActivate: [authGuard],
   },
   {
-    // TODO: After backend implement, this logic will need to change to order/:orderId
     path: 'order',
-    component: Order
+    component: Order,
+    canActivate: [authGuard],
   },
   {
-    // TODO: After backend implement, need to have the CRUD function
     path: 'admin',
-    component: Admin
+    component: Admin,
+    canActivate: [() => {
+      const auth = inject(AuthService);
+      const router = inject(Router);
+      if (auth.isLoggedIn() && auth.isAdmin()) return true;
+      router.navigate(['/']);
+      return false;
+    }],
   },
 ];

@@ -1,4 +1,4 @@
-import { Component, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -12,7 +12,7 @@ import { ProductService } from '../../services/product-service';
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
 })
-export class Header {
+export class Header implements OnInit {
   brands: string[] = [];
 
   private isBrowser: boolean;
@@ -23,7 +23,14 @@ export class Header {
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
-    this.brands = this.productService.getBrands(); // auto‑load brands
+  }
+
+  ngOnInit(): void {
+    // getBrands() is now an Observable — subscribe to it
+    this.productService.getBrands().subscribe({
+      next: brands => (this.brands = brands),
+      error: () => (this.brands = []),
+    });
   }
 
   get isLoggedIn(): boolean {
@@ -34,6 +41,10 @@ export class Header {
       console.error('Error checking login status:', e);
       return false;
     }
+  }
+
+  get isAdmin(): boolean {
+    return this.isBrowser && this.authService.isAdmin();
   }
 
   logout(): void {

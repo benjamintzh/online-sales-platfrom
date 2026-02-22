@@ -1,63 +1,151 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, forkJoin, of } from 'rxjs';
+import { catchError, switchMap, map } from 'rxjs/operators';
+import { AuthService } from '../core/auth/auth.service';
 
 export interface CartItem {
-    id: number;
-    name: string;
-    brand: string;
-    type: string;
-    price: number;
-    image: string;
-    quantity: number;
-    stock: number; // 👈 added
+  id: number;           // cart item ID from backend
+  productId: number;
+  name: string;         // productName
+  brand: string;        // productBrand
+  type: string;
+  price: number;
+  image: string;        // imageUrl
+  quantity: number;
+  stock: number;        // fetched from GET /api/products/{id}
+  subtotal: number;
+}
+
+// Raw shape from backend CartDto.CartItemResponse
+interface CartItemApi {
+  id: number;
+  productId: number;
+  productName: string;
+  productBrand: string;
+  imageUrl: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+}
+
+interface CartApi {
+  items: CartItemApi[];
+  total: number;
+  itemCount: number;
+}
+
+interface ProductApi {
+  id: number;
+  stock: number;
+  categoryName: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-    private itemsSubject = new BehaviorSubject<CartItem[]>([
-        { id: 1, name: 'Logitech Keyboard', brand: 'Logitech', type: 'Keyboard', price: 99.99, image: 'assets/logitech-keyboard.webp', quantity: 2, stock: 45 },
-        { id: 2, name: 'Dell Monitor', brand: 'Dell', type: 'Monitor', price: 199.99, image: 'assets/dell-monitor.webp', quantity: 1, stock: 12 },
-        { id: 3, name: 'Asus Laptop', brand: 'Asus', type: 'Laptop', price: 899.99, image: 'assets/asus-laptop.webp', quantity: 3, stock: 8 },
-    ]);
+  private readonly CART_URL = 'http://localhost:8080/api/cart';
+  private readonly PRODUCTS_URL = 'http://localhost:8080/api/products';
 
-    items$ = this.itemsSubject.asObservable();
+  private itemsSubject = new BehaviorSubject<CartItem[]>([]);
+  items$ = this.itemsSubject.asObservable();
 
-    get items(): CartItem[] {
-        return this.itemsSubject.getValue();
-    }
-
-    addItem(product: { id: number; name: string; brand: string; type: string; price: number; image: string; stock: number }, quantity: number): void {
-        const existing = this.items.find(i => i.id === product.id);
-        if (existing) {
-            // cap at stock when adding to existing
-            const newQty = Math.min(existing.quantity + quantity, existing.stock);
-            this.updateQuantity(product.id, newQty);
-        } else {
-            // cap initial quantity at stock
-            const safeQty = Math.min(quantity, product.stock);
-            this.itemsSubject.next([...this.items, { ...product, quantity: safeQty }]);
-        }
-    }
-
-    updateQuantity(itemId: number, quantity: number): void {
-        this.itemsSubject.next(
-            this.items.map(i =>
-                i.id === itemId
-                    ? { ...i, quantity: Math.min(Math.max(1, quantity), i.stock) }
-                    : i
-            )
-        );
-    }
-
-    removeItem(itemId: number): void {
-        this.itemsSubject.next(this.items.filter(i => i.id !== itemId));
-    }
-
-    clearCart(): void {
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {
+    // Load cart from backend whenever user logs in
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.loadCart();
+      } else {
         this.itemsSubject.next([]);
+      }
+    });
+  }
+
+  // ── Public getters ──────────────────────────────────────────────────────────
+
+  get items(): CartItem[] {
+    return this.itemsSubject.getValue();
+  }
+
+  get subtotal(): number {
+    return this.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  }
+
+  // ── API actions ─────────────────────────────────────────────────────────────
+
+  loadCart(): void {
+    this.http.get<CartApi>(this.CART_URL).pipe(
+      switchMap(cart => this.enrichWithStock(cart.items))
+    ).subscribe({
+      next: items => this.itemsSubject.next(items),
+      error: () => this.itemsSubject.next([]),
+    });
+  }
+
+  addItem(product: { id: number; name: string; brand: string; type: string; price: number; image: string; stock: number }, quantity: number): void {
+    this.http.post<CartApi>(this.CART_URL, { productId: product.id, quantity }).pipe(
+      switchMap(cart => this.enrichWithStock(cart.items))
+    ).subscribe({
+      next: items => this.itemsSubject.next(items),
+    });
+  }
+
+  updateQuantity(cartItemId: number, quantity: number): void {
+    this.http.put<CartApi>(`${this.CART_URL}/${cartItemId}`, { quantity }).pipe(
+      switchMap(cart => this.enrichWithStock(cart.items))
+    ).subscribe({
+      next: items => this.itemsSubject.next(items),
+    });
+  }
+
+  removeItem(cartItemId: number): void {
+    this.http.delete<CartApi>(`${this.CART_URL}/${cartItemId}`).pipe(
+      switchMap(cart => this.enrichWithStock(cart.items))
+    ).subscribe({
+      next: items => this.itemsSubject.next(items),
+    });
+  }
+
+  clearCart(): void {
+    this.http.delete(this.CART_URL).subscribe({
+      next: () => this.itemsSubject.next([]),
+    });
+  }
+
+  // ── Stock enrichment ────────────────────────────────────────────────────────
+
+  /**
+   * For each cart item, fetch the corresponding product to get its real stock
+   * and categoryName. Uses forkJoin so all requests fire in parallel.
+   */
+  private enrichWithStock(cartItems: CartItemApi[]) {
+    if (cartItems.length === 0) {
+      return of([]);
     }
 
-    get subtotal(): number {
-        return this.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    }
+    const productRequests = cartItems.map(item =>
+      this.http.get<ProductApi>(`${this.PRODUCTS_URL}/${item.productId}`).pipe(
+        catchError(() => of({ id: item.productId, stock: 0, categoryName: '' }))
+      )
+    );
+
+    return forkJoin(productRequests).pipe(
+      map(products =>
+        cartItems.map((item, index) => ({
+          id: item.id,
+          productId: item.productId,
+          name: item.productName,
+          brand: item.productBrand,
+          type: products[index].categoryName,
+          price: item.price,
+          image: item.imageUrl,
+          quantity: item.quantity,
+          stock: products[index].stock,   // real stock from product API
+          subtotal: item.subtotal,
+        }))
+      )
+    );
+  }
 }

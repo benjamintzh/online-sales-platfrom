@@ -1,47 +1,59 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.html',
-  styleUrls: ['./login.css']
+  styleUrls: ['./login.css'],
 })
 export class Login {
+  isLoginMode = true;
+  showPassword = false;
+  isLoading = false;
+  successMessage = '';
+  errorMessage = '';
+
   loginForm: FormGroup;
   registerForm: FormGroup;
-  isLoginMode = true;
-  errorMessage = '';
-  successMessage = '';
-  showPassword = false;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
   ) {
-    // Login form
-    this.loginForm = this.formBuilder.group({
+    this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    // Register form
-    this.registerForm = this.formBuilder.group({
+    this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
     });
   }
 
+  // ── Getters ─────────────────────────────────────────────────────────────────
+
+  get loginEmail() { return this.loginForm.get('email'); }
+  get loginPassword() { return this.loginForm.get('password'); }
+  get registerName() { return this.registerForm.get('name'); }
+  get registerEmail() { return this.registerForm.get('email'); }
+  get registerPassword() { return this.registerForm.get('password'); }
+  get registerConfirmPassword() { return this.registerForm.get('confirmPassword'); }
+
+  // ── Actions ─────────────────────────────────────────────────────────────────
+
   toggleMode(): void {
     this.isLoginMode = !this.isLoginMode;
-    this.errorMessage = '';
     this.successMessage = '';
+    this.errorMessage = '';
     this.loginForm.reset();
     this.registerForm.reset();
   }
@@ -51,78 +63,51 @@ export class Login {
   }
 
   onLogin(): void {
-    if (this.loginForm.invalid) {
-      this.errorMessage = 'Please fill in all fields correctly';
-      return;
-    }
+    if (this.loginForm.invalid) return;
 
+    this.isLoading = true;
+    this.errorMessage = '';
     const { email, password } = this.loginForm.value;
-    const result = this.authService.login(email, password);
 
-    if (result.success) {
-      this.successMessage = result.message;
-      this.errorMessage = '';
-      setTimeout(() => {
+    this.authService.login(email, password).subscribe({
+      next: () => {
+        this.isLoading = false;
         this.router.navigate(['/']);
-      }, 1000);
-    } else {
-      this.errorMessage = result.message;
-      this.successMessage = '';
-    }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.status === 401
+          ? 'Invalid email or password.'
+          : 'Login failed. Please try again.';
+      },
+    });
   }
 
   onRegister(): void {
-    if (this.registerForm.invalid) {
-      this.errorMessage = 'Please fill in all fields correctly';
-      return;
-    }
+    if (this.registerForm.invalid) return;
 
     const { name, email, password, confirmPassword } = this.registerForm.value;
 
-    // Check if passwords match
     if (password !== confirmPassword) {
-      this.errorMessage = 'Passwords do not match';
+      this.errorMessage = 'Passwords do not match.';
       return;
     }
 
-    const result = this.authService.register(name, email, password);
+    this.isLoading = true;
+    this.errorMessage = '';
 
-    if (result.success) {
-      this.successMessage = result.message;
-      this.errorMessage = '';
-      this.registerForm.reset();
-      setTimeout(() => {
-        this.isLoginMode = true;
-        this.successMessage = '';
-      }, 2000);
-    } else {
-      this.errorMessage = result.message;
-      this.successMessage = '';
-    }
-  }
-
-  // Getter methods for form validation
-  get loginEmail() {
-    return this.loginForm.get('email');
-  }
-
-  get loginPassword() {
-    return this.loginForm.get('password');
-  }
-
-  get registerName() {
-    return this.registerForm.get('name');
-  }
-
-  get registerEmail() {
-    return this.registerForm.get('email');
-  }
-
-  get registerPassword() {
-    return this.registerForm.get('password');
-  }
-
-  get registerConfirmPassword() {
-    return this.registerForm.get('confirmPassword');
+    this.authService.register(name, email, password).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.successMessage = 'Account created! You are now logged in.';
+        setTimeout(() => this.router.navigate(['/']), 1000);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.status === 409
+          ? 'Email already registered.'
+          : 'Registration failed. Please try again.';
+      },
+    });
   }
 }

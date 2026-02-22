@@ -20,26 +20,36 @@ export class ViewProduct implements OnInit {
   product: Product | null = null;
   quantity = 1;
   added = false;
+  isLoading = false;
 
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
-      this.product = this.productService.getProducts().find(p => p.id === id) || null;
       this.quantity = 1;
       this.added = false;
+      this.isLoading = true;
+
+      this.productService.getProductById(id).subscribe({
+        next: product => {
+          this.product = product;
+          this.isLoading = false;
+        },
+        error: () => {
+          this.product = null;
+          this.isLoading = false;
+        },
+      });
     });
   }
 
   increment(): void {
     if (!this.product) return;
-    if (this.quantity < this.product.stock) {
-      this.quantity++;
-    }
+    if (this.quantity < this.product.stock) this.quantity++;
   }
 
   decrement(): void {
@@ -70,6 +80,6 @@ export class ViewProduct implements OnInit {
     this.cartService.addItem(this.product, this.quantity);
     alert(`${this.product.name} x${this.quantity} has been added to Cart`);
     this.added = true;
-    setTimeout(() => this.added = false, 1500);
+    setTimeout(() => (this.added = false), 1500);
   }
 }

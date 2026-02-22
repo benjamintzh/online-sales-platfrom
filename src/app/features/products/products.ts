@@ -1,11 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Header } from '../../shared/header/header';
 import { Footer } from '../../shared/footer/footer';
 import { ProductService, Product } from '../../services/product-service';
-import { Router } from '@angular/router';
 import { CartService } from '../../services/cart-service';
 
 @Component({
@@ -26,6 +25,7 @@ export class Products implements OnInit {
   selectedTypes: Set<string> = new Set();
   quantities: Map<number, number> = new Map();
   addedToCart: Set<number> = new Set();
+  isLoading = false;
 
   constructor(
     private productService: ProductService,
@@ -34,29 +34,40 @@ export class Products implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.products = this.productService.getProducts();
-    this.brands = this.productService.getBrands();
-    this.types = this.productService.getTypes();
+    this.isLoading = true;
 
-    this.route.paramMap.subscribe((params) => {
-      const brand = params.get('brand');
-      this.selectedBrands.clear();
-      if (brand) {
-        this.selectedBrands.add(this.capitalize(brand));
-      }
-      this.applyFilters();
+    // Load brands from backend
+    this.productService.getBrands().subscribe({
+      next: brands => (this.brands = brands),
+    });
+
+    // Load all products then filter by brand route param
+    this.productService.getProducts().subscribe({
+      next: products => {
+        this.products = products;
+        // Derive unique types from the loaded products
+        this.types = [...new Set(products.map(p => p.type))];
+        this.isLoading = false;
+
+        // Apply brand from route param if present
+        this.route.paramMap.subscribe(params => {
+          const brand = params.get('brand');
+          this.selectedBrands.clear();
+          if (brand) {
+            this.selectedBrands.add(this.capitalize(brand));
+          }
+          this.applyFilters();
+        });
+      },
+      error: () => (this.isLoading = false),
     });
   }
 
   setQuantity(productId: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = parseInt(input.value, 10);
-    if (!isNaN(value) && value >= 1) {
-      this.quantities.set(productId, value);
-    } else {
-      this.quantities.set(productId, 1);
-      input.value = '1';
-    }
+    this.quantities.set(productId, !isNaN(value) && value >= 1 ? value : 1);
+    if (isNaN(value) || value < 1) input.value = '1';
   }
 
   getQuantity(productId: number): number {
@@ -75,9 +86,7 @@ export class Products implements OnInit {
   addToCart(product: Product): void {
     const quantity = this.getQuantity(product.id);
     this.cartService.addItem(product, quantity);
-
     alert(`${product.name} x${quantity} has been added to Cart`);
-
     this.addedToCart.add(product.id);
     this.quantities.delete(product.id);
     setTimeout(() => this.addedToCart.delete(product.id), 1500);
@@ -102,7 +111,7 @@ export class Products implements OnInit {
   }
 
   applyFilters(): void {
-    this.filteredProducts = this.products.filter((p) => {
+    this.filteredProducts = this.products.filter(p => {
       const brandMatch = this.selectedBrands.size === 0 || this.selectedBrands.has(p.brand);
       const typeMatch = this.selectedTypes.size === 0 || this.selectedTypes.has(p.type);
       return brandMatch && typeMatch;
@@ -115,11 +124,11 @@ export class Products implements OnInit {
     this.filteredProducts = this.products;
   }
 
-  private capitalize(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
   viewProduct(product: Product): void {
     this.router.navigate(['/products', product.brand.toLowerCase(), product.id]);
+  }
+
+  private capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }
