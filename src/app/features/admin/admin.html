@@ -1,387 +1,346 @@
 <div class="admin-shell">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <span class="brand-icon">⚙</span>
-            <span class="brand-name">Admin Panel</span>
-        </div>
-        <nav class="sidebar-nav">
-            <button class="nav-item" [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">
-                <span class="nav-icon">▦</span> Dashboard
-            </button>
-            <button class="nav-item" [class.active]="activeTab === 'users'" (click)="setTab('users')">
-                <span class="nav-icon">👤</span> Users
-                <span class="nav-badge">{{ users.length }}</span>
-            </button>
-            <button class="nav-item" [class.active]="activeTab === 'products'" (click)="setTab('products')">
-                <span class="nav-icon">📦</span> Products
-                <span class="nav-badge">{{ products.length }}</span>
-            </button>
-            <button class="nav-item" [class.active]="activeTab === 'orders'" (click)="setTab('orders')">
-                <span class="nav-icon">🧾</span> Orders
-                <span class="nav-badge">{{ orders.length }}</span>
-            </button>
-        </nav>
-        <div class="sidebar-footer"><span>WOU Tech Sdn. Bhd.</span></div>
-    </aside>
-
-    <!-- Main -->
-    <div class="admin-main">
-        <header class="topbar">
-            <h1 class="topbar-title">
-                {{ activeTab === 'dashboard' ? 'Dashboard' :
-                activeTab === 'users' ? 'User Management' :
-                activeTab === 'products' ? 'Product Management' : 'Order Management' }}
-            </h1>
-            <div class="topbar-admin">
-                <span class="admin-avatar">A</span>
-                <span class="admin-name">Admin</span>
-            </div>
-        </header>
-
-        <div class="content-area">
-
-            <!-- Dashboard -->
-            <ng-container *ngIf="activeTab === 'dashboard'">
-                <div class="stat-cards">
-                    <div class="stat-card">
-                        <div class="stat-icon blue">💰</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Total Revenue</p>
-                            <p class="stat-value">RM {{ totalRevenue.toFixed(2) }}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon green">👥</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Active Users</p>
-                            <p class="stat-value">{{ activeUsers }}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon yellow">📦</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Total Products</p>
-                            <p class="stat-value">{{ products.length }}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon red">🕐</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Pending Orders</p>
-                            <p class="stat-value">{{ pendingOrders }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-card">
-                    <div class="table-header">
-                        <h2 class="table-title">Recent Orders</h2>
-                        <button class="view-all-btn" (click)="setTab('orders')">View All →</button>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Date</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let order of orders.slice(0, 3)">
-                                <td class="mono">{{ order.id }}</td>
-                                <td>{{ order.customer }}</td>
-                                <td>{{ order.date }}</td>
-                                <td>RM {{ order.total.toFixed(2) }}</td>
-                                <td><span class="badge" [ngClass]="statusClass(order.status)">{{ order.status }}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </ng-container>
-
-            <!-- Users -->
-            <ng-container *ngIf="activeTab === 'users'">
-                <div class="table-card">
-                    <div class="table-header">
-                        <h2 class="table-title">All Users</h2>
-                        <div class="header-actions">
-                            <input class="search-input" type="text" placeholder="Search users..."
-                                [(ngModel)]="userSearch" />
-                            <button class="create-btn" (click)="openUserModal()">+ Create User</button>
-                        </div>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Joined</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let user of filteredUsers">
-                                <td class="mono">{{ user.id }}</td>
-                                <td><strong>{{ user.name }}</strong></td>
-                                <td class="muted">{{ user.email }}</td>
-                                <td><span class="badge"
-                                        [ngClass]="user.role === 'Admin' ? 'badge-primary' : 'badge-info'">{{ user.role
-                                        }}</span></td>
-                                <td><span class="badge"
-                                        [ngClass]="user.status === 'Active' ? 'badge-success' : 'badge-danger'">{{
-                                        user.status }}</span></td>
-                                <td class="muted">{{ user.joined }}</td>
-                                <td class="actions-cell">
-                                    <!-- 👇 passes user into openUserModal -->
-                                    <button class="action-btn edit-btn" (click)="openUserModal(user)">Edit</button>
-                                    <button class="action-btn toggle-btn" (click)="toggleUserStatus(user)">
-                                        {{ user.status === 'Active' ? 'Deactivate' : 'Activate' }}
-                                    </button>
-                                    <button class="action-btn delete-btn" (click)="deleteUser(user.id)">Delete</button>
-                                </td>
-                            </tr>
-                            <tr *ngIf="filteredUsers.length === 0">
-                                <td colspan="7" class="empty-row">No users found.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </ng-container>
-
-            <!-- Products -->
-            <ng-container *ngIf="activeTab === 'products'">
-                <div class="table-card">
-                    <div class="table-header">
-                        <h2 class="table-title">All Products</h2>
-                        <div class="header-actions">
-                            <input class="search-input" type="text" placeholder="Search products..."
-                                [(ngModel)]="productSearch" />
-                            <button class="create-btn" (click)="openProductModal()">+ Create Product</button>
-                        </div>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Brand</th>
-                                <th>Type</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let product of filteredProducts">
-                                <td class="mono">{{ product.id }}</td>
-                                <td><strong>{{ product.name }}</strong></td>
-                                <td>{{ product.brand }}</td>
-                                <td class="muted">{{ product.type }}</td>
-                                <td>RM {{ product.price.toFixed(2) }}</td>
-                                <td><span class="badge" [ngClass]="stockClass(product.stock)">{{
-                                        stockLabel(product.stock) }} ({{ product.stock }})</span></td>
-                                <td class="actions-cell">
-                                    <!-- 👇 passes product into openProductModal -->
-                                    <button class="action-btn edit-btn"
-                                        (click)="openProductModal(product)">Edit</button>
-                                    <button class="action-btn delete-btn"
-                                        (click)="deleteProduct(product.id)">Delete</button>
-                                </td>
-                            </tr>
-                            <tr *ngIf="filteredProducts.length === 0">
-                                <td colspan="7" class="empty-row">No products found.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </ng-container>
-
-            <!-- Orders -->
-            <ng-container *ngIf="activeTab === 'orders'">
-                <div class="table-card">
-                    <div class="table-header">
-                        <h2 class="table-title">All Orders</h2>
-                        <div class="header-actions">
-                            <input class="search-input" type="text" placeholder="Search orders..."
-                                [(ngModel)]="orderSearch" />
-                            <button class="create-btn" (click)="openOrderModal()">+ Create Order</button>
-                        </div>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Date</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Update Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let order of filteredOrders">
-                                <td class="mono">{{ order.id }}</td>
-                                <td><strong>{{ order.customer }}</strong></td>
-                                <td class="muted">{{ order.date }}</td>
-                                <td class="muted">{{ order.items }}</td>
-                                <td>RM {{ order.total.toFixed(2) }}</td>
-                                <td><span class="badge" [ngClass]="statusClass(order.status)">{{ order.status }}</span>
-                                </td>
-                                <td>
-                                    <select class="status-select" [value]="order.status"
-                                        (change)="updateOrderStatus(order, $any($event.target).value)">
-                                        <option *ngFor="let s of orderStatuses" [value]="s">{{ s }}</option>
-                                    </select>
-                                </td>
-                                <!-- 👇 delete button -->
-                                <td class="actions-cell">
-                                    <button class="action-btn delete-btn"
-                                        (click)="deleteOrder(order.id)">Delete</button>
-                                </td>
-                            </tr>
-                            <tr *ngIf="filteredOrders.length === 0">
-                                <td colspan="8" class="empty-row">No orders found.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </ng-container>
-
-        </div>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">⚙</span>
+      <span class="brand-name">Admin Panel</span>
     </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">
+        <span class="nav-icon">▦</span> Dashboard
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'users'" (click)="setTab('users')">
+        <span class="nav-icon">👤</span> Users
+        <span class="nav-badge">{{ users.length }}</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'products'" (click)="setTab('products')">
+        <span class="nav-icon">📦</span> Products
+        <span class="nav-badge">{{ products.length }}</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'orders'" (click)="setTab('orders')">
+        <span class="nav-icon">🧾</span> Orders
+        <span class="nav-badge">{{ orders.length }}</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer"><span>WOU Tech Sdn. Bhd.</span></div>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <header class="topbar">
+      <h1 class="topbar-title">
+        {{ activeTab === 'dashboard' ? 'Dashboard' :
+        activeTab === 'users' ? 'User Management' :
+        activeTab === 'products' ? 'Product Management' : 'Order Management' }}
+      </h1>
+      <div class="topbar-admin">
+        <span class="admin-avatar">A</span>
+        <span class="admin-name">Admin</span>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- Dashboard -->
+      <ng-container *ngIf="activeTab === 'dashboard'">
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-icon blue">💰</div>
+            <div class="stat-info">
+              <p class="stat-label">Total Revenue</p>
+              <p class="stat-value">RM {{ stats.totalRevenue.toFixed(2) }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">👥</div>
+            <div class="stat-info">
+              <p class="stat-label">Active Users</p>
+              <p class="stat-value">{{ stats.activeUsers }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow">📦</div>
+            <div class="stat-info">
+              <p class="stat-label">Total Products</p>
+              <p class="stat-value">{{ stats.totalProducts }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">🕐</div>
+            <div class="stat-info">
+              <p class="stat-label">Pending Orders</p>
+              <p class="stat-value">{{ stats.pendingOrders }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <h2 class="table-title">Recent Orders</h2>
+            <button class="view-all-btn" (click)="setTab('orders')">View All →</button>
+          </div>
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let order of orders.slice(0, 3)">
+              <td class="mono">#{{ order.id }}</td>
+              <td>{{ order.customerName }}</td>
+              <td>{{ formatDate(order.createdAt) }}</td>
+              <td>RM {{ order.totalAmount.toFixed(2) }}</td>
+              <td><span class="badge" [ngClass]="statusClass(order.status)">{{ order.status }}</span></td>
+            </tr>
+            <tr *ngIf="orders.length === 0">
+              <td colspan="5" class="empty-row">No orders yet.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- Users -->
+      <ng-container *ngIf="activeTab === 'users'">
+        <div class="table-card">
+          <div class="table-header">
+            <h2 class="table-title">All Users</h2>
+            <div class="header-actions">
+              <input class="search-input" type="text" placeholder="Search users..."
+                     [(ngModel)]="userSearch"/>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let user of filteredUsers">
+              <td class="mono">{{ user.id }}</td>
+              <td><strong>{{ user.name }}</strong></td>
+              <td class="muted">{{ user.email }}</td>
+              <td><span class="badge"
+                        [ngClass]="user.role === 'ADMIN' ? 'badge-primary' : 'badge-info'">{{ user.role }}</span></td>
+              <td><span class="badge"
+                        [ngClass]="user.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">{{ user.status }}</span>
+              </td>
+              <td class="muted">{{ formatDate(user.createdAt) }}</td>
+              <td class="actions-cell">
+                <button class="action-btn edit-btn" (click)="openUserModal(user)">Edit</button>
+                <button class="action-btn toggle-btn" (click)="toggleUserStatus(user)">
+                  {{ user.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
+                </button>
+                <button class="action-btn delete-btn" (click)="deleteUser(user.id)">Delete</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredUsers.length === 0">
+              <td colspan="7" class="empty-row">No users found.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- Products -->
+      <ng-container *ngIf="activeTab === 'products'">
+        <div class="table-card">
+          <div class="table-header">
+            <h2 class="table-title">All Products</h2>
+            <div class="header-actions">
+              <input class="search-input" type="text" placeholder="Search products..."
+                     [(ngModel)]="productSearch"/>
+              <button class="create-btn" (click)="openProductModal()">+ Create Product</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Brand</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let product of filteredProducts">
+              <td class="mono">{{ product.id }}</td>
+              <td><strong>{{ product.name }}</strong></td>
+              <td>{{ product.brand }}</td>
+              <td class="muted">{{ product.categoryName }}</td>
+              <td>RM {{ product.price.toFixed(2) }}</td>
+              <td><span class="badge" [ngClass]="stockClass(product.stock)">
+                                    {{ stockLabel(product.stock) }} ({{ product.stock }})</span></td>
+              <td class="actions-cell">
+                <button class="action-btn edit-btn" (click)="openProductModal(product)">Edit</button>
+                <button class="action-btn delete-btn" (click)="deleteProduct(product.id)">Delete</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredProducts.length === 0">
+              <td colspan="7" class="empty-row">No products found.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- Orders -->
+      <ng-container *ngIf="activeTab === 'orders'">
+        <div class="table-card">
+          <div class="table-header">
+            <h2 class="table-title">All Orders</h2>
+            <div class="header-actions">
+              <input class="search-input" type="text" placeholder="Search orders..."
+                     [(ngModel)]="orderSearch"/>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Email</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Update Status</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let order of filteredOrders">
+              <td class="mono">#{{ order.id }}</td>
+              <td><strong>{{ order.customerName }}</strong></td>
+              <td class="muted">{{ order.customerEmail }}</td>
+              <td class="muted">{{ formatDate(order.createdAt) }}</td>
+              <td class="muted">{{ order.itemCount }}</td>
+              <td>RM {{ order.totalAmount.toFixed(2) }}</td>
+              <td><span class="badge" [ngClass]="statusClass(order.status)">{{ order.status }}</span></td>
+              <td>
+                <select class="status-select"
+                        [value]="getDisplayStatus(order)"
+                        (change)="onStatusChange(order, $any($event.target).value)">
+                  <option *ngFor="let s of orderStatuses" [value]="s">{{ s }}</option>
+                </select>
+              </td>
+              <td class="actions-cell">
+                <button class="action-btn delete-btn" (click)="deleteOrder(order.id)">Delete</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredOrders.length === 0">
+              <td colspan="9" class="empty-row">No orders found.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+    </div>
+  </div>
 </div>
 
 <!-- ── User Modal ── -->
 <div class="modal-overlay" *ngIf="showUserModal" (click)="showUserModal = false">
-    <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2 class="modal-title">{{ userModalTitle }}</h2>
-            <button class="modal-close" (click)="showUserModal = false">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-field">
-                <label>Full Name <span class="required">*</span></label>
-                <input type="text" [(ngModel)]="newUser.name" placeholder="e.g. John Doe" />
-            </div>
-            <div class="form-field">
-                <label>Email <span class="required">*</span></label>
-                <input type="email" [(ngModel)]="newUser.email" placeholder="e.g. john@email.com" />
-            </div>
-            <div class="form-row-two">
-                <div class="form-field">
-                    <label>Role</label>
-                    <select [(ngModel)]="newUser.role">
-                        <option value="Customer">Customer</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-                </div>
-                <div class="form-field">
-                    <label>Status</label>
-                    <select [(ngModel)]="newUser.status">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-field">
-                <label>Joined Date</label>
-                <input type="date" [(ngModel)]="newUser.joined" />
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="modal-cancel" (click)="showUserModal = false">Cancel</button>
-            <button class="modal-save" (click)="saveUser()">{{ userSaveLabel }}</button>
-        </div>
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ userModalTitle }}</h2>
+      <button class="modal-close" (click)="showUserModal = false">✕</button>
     </div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label>Full Name <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="newUser.name" placeholder="e.g. John Doe"/>
+      </div>
+      <div class="form-field">
+        <label>Email <span class="required">*</span></label>
+        <input type="email" [(ngModel)]="newUser.email" placeholder="e.g. john@email.com"/>
+      </div>
+      <div class="form-row-two">
+        <div class="form-field">
+          <label>Role</label>
+          <select [(ngModel)]="newUser.role">
+            <option value="CUSTOMER">Customer</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Status</label>
+          <select [(ngModel)]="newUser.status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" (click)="showUserModal = false">Cancel</button>
+      <button class="modal-save" (click)="saveUser()">{{ userSaveLabel }}</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── Product Modal ── -->
 <div class="modal-overlay" *ngIf="showProductModal" (click)="showProductModal = false">
-    <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2 class="modal-title">{{ productModalTitle }}</h2>
-            <button class="modal-close" (click)="showProductModal = false">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-field">
-                <label>Product Name <span class="required">*</span></label>
-                <input type="text" [(ngModel)]="newProduct.name" placeholder="e.g. Logitech Mouse" />
-            </div>
-            <div class="form-row-two">
-                <div class="form-field">
-                    <label>Brand <span class="required">*</span></label>
-                    <input type="text" [(ngModel)]="newProduct.brand" placeholder="e.g. Logitech" />
-                </div>
-                <div class="form-field">
-                    <label>Type</label>
-                    <input type="text" [(ngModel)]="newProduct.type" placeholder="e.g. Mouse" />
-                </div>
-            </div>
-            <div class="form-row-two">
-                <div class="form-field">
-                    <label>Price (RM)</label>
-                    <input type="number" [(ngModel)]="newProduct.price" min="0" placeholder="0.00" />
-                </div>
-                <div class="form-field">
-                    <label>Stock</label>
-                    <input type="number" [(ngModel)]="newProduct.stock" min="0" placeholder="0" />
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="modal-cancel" (click)="showProductModal = false">Cancel</button>
-            <button class="modal-save" (click)="saveProduct()">{{ productSaveLabel }}</button>
-        </div>
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ productModalTitle }}</h2>
+      <button class="modal-close" (click)="showProductModal = false">✕</button>
     </div>
-</div>
-
-<!-- ── Order Modal ── -->
-<div class="modal-overlay" *ngIf="showOrderModal" (click)="showOrderModal = false">
-    <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2 class="modal-title">Create Order</h2>
-            <button class="modal-close" (click)="showOrderModal = false">✕</button>
+    <div class="modal-body">
+      <div class="form-field">
+        <label>Product Name <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="newProduct.name" placeholder="e.g. Logitech Mouse"/>
+      </div>
+      <div class="form-row-two">
+        <div class="form-field">
+          <label>Brand <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="newProduct.brand" placeholder="e.g. Logitech"/>
         </div>
-        <div class="modal-body">
-            <div class="form-field">
-                <label>Customer Name <span class="required">*</span></label>
-                <input type="text" [(ngModel)]="newOrder.customer" placeholder="e.g. Bob Lim" />
-            </div>
-            <div class="form-row-two">
-                <div class="form-field">
-                    <label>Date</label>
-                    <input type="date" [(ngModel)]="newOrder.date" />
-                </div>
-                <div class="form-field">
-                    <label>Status</label>
-                    <select [(ngModel)]="newOrder.status">
-                        <option *ngFor="let s of orderStatuses" [value]="s">{{ s }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row-two">
-                <div class="form-field">
-                    <label>Total (RM)</label>
-                    <input type="number" [(ngModel)]="newOrder.total" min="0" placeholder="0.00" />
-                </div>
-                <div class="form-field">
-                    <label>No. of Items</label>
-                    <input type="number" [(ngModel)]="newOrder.items" min="1" placeholder="1" />
-                </div>
-            </div>
+        <div class="form-field">
+          <label>Category <span class="required">*</span></label>
+          <select [(ngModel)]="newProduct.categoryId">
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
         </div>
-        <div class="modal-footer">
-            <button class="modal-cancel" (click)="showOrderModal = false">Cancel</button>
-            <button class="modal-save" (click)="saveOrder()">Create Order</button>
+      </div>
+      <div class="form-row-two">
+        <div class="form-field">
+          <label>Price (RM)</label>
+          <input type="number" [(ngModel)]="newProduct.price" min="0" placeholder="0.00"/>
         </div>
+        <div class="form-field">
+          <label>Stock</label>
+          <input type="number" [(ngModel)]="newProduct.stock" min="0" placeholder="0"/>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Image URL</label>
+        <input type="text" [(ngModel)]="newProduct.imageUrl" placeholder="e.g. assets/product.webp"/>
+      </div>
+      <div class="form-field">
+        <label>Description</label>
+        <input type="text" [(ngModel)]="newProduct.description" placeholder="Short product description"/>
+      </div>
     </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" (click)="showProductModal = false">Cancel</button>
+      <button class="modal-save" (click)="saveProduct()">{{ productSaveLabel }}</button>
+    </div>
+  </div>
 </div>
